@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:football_shop/widgets/left_drawer.dart';
+import 'dart:convert';
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:football_shop/screens/menu.dart'; 
 
 class ProductEntryFormPage extends StatefulWidget {
   const ProductEntryFormPage({super.key});
@@ -27,6 +31,8 @@ class _ProductEntryFormPageState extends State<ProductEntryFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
+    
     return Scaffold(
       appBar: AppBar(
         title: const Center(
@@ -159,10 +165,8 @@ class _ProductEntryFormPageState extends State<ProductEntryFormPage> {
                       borderRadius: BorderRadius.circular(5.0),
                     ),
                   ),
-                  onChanged: (String? value) {
-                    setState(() {
-                      _thumbnail = value!;
-                    });
+                  onSaved: (String? value) {
+                    _thumbnail = value ?? "";
                   },
                 ),
               ),
@@ -184,48 +188,44 @@ class _ProductEntryFormPageState extends State<ProductEntryFormPage> {
                   padding: const EdgeInsets.all(8.0),
                   child: ElevatedButton(
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(
+                      backgroundColor: WidgetStateProperty.all(
                           Theme.of(context).colorScheme.primary),
                     ),
-                    onPressed: () {
+                    onPressed: () async { 
                       if (_formKey.currentState!.validate()) {
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: const Text('Produk berhasil disimpan'),
-                              content: SingleChildScrollView(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Nama: $_name'),
-                                    Text('Harga: $_price'),
-                                    Text('Deskripsi: $_description'),
-                                    Text('Kategori: $_category'),
-                                    Text('Unggulan: ${_isFeatured ? "Ya" : "Tidak"}'),
-                                  ],
-                                ),
-                              ),
-                              actions: [
-                                TextButton(
-                                  child: const Text('OK'),
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    _formKey.currentState!.reset();
-                                    setState(() {
-                                      _name = "";
-                                      _price = 0;
-                                      _description = "";
-                                      _thumbnail = "";
-                                      _category = "Jersey";
-                                      _isFeatured = false;
-                                    });
-                                  },
-                                ),
-                              ],
-                            );
-                          },
+                        _formKey.currentState!.save();
+                      
+                        final response = await request.postJson(
+                          "http://localhost:8000/main/create-products-flutter/", 
+                          jsonEncode({
+                            "name": _name,
+                            "price": _price,
+                            "description": _description,
+                            "thumbnail": _thumbnail,
+                            "category": _category,
+                            "is_featured": _isFeatured,
+                          }),
                         );
+
+                        if (context.mounted) {
+                          if (response['status'] == 'success') {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(const SnackBar(
+                              content: Text("Produk berhasil disimpan!"),
+                            ));
+                            
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MyHomePage()),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(const SnackBar(
+                              content: Text("Terjadi kesalahan, silakan coba lagi."),
+                            ));
+                          }
+                        }
                       }
                     },
                     child: const Text(
