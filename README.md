@@ -63,8 +63,6 @@ Saya membuat RegisterPage di Flutter. Saya menggunakan CookieRequest untuk mengi
 Saya membuat LoginPage di Flutter. Halaman ini memiliki form input untuk kredensial. Form akan memanggil method request.login() dari CookieRequest.
 - Mengintegrasikan sistem autentikasi Django dengan proyek tugas Flutter.
 Integrasi dilakukan melalui instance CookieRequest. Setelah Login, Django mengirimkan cookie sesi yang secara otomatis ditangkap dan disimpan oleh CookieRequest. Status login dikelola oleh Provider agar dapat diakses di seluruh aplikasi Flutter untuk menampilkan menu terautentikasi.
-- Membuat model kustom sesuai dengan proyek aplikasi Django.
-Model Dart dibuat dengan fields yang sesuai dengan model Django saya. untuk mengkonversi data JSON yang diterima dari Django menjadi objek Dart.
 - Membuat halaman yang berisi daftar semua item yang terdapat pada endpoint JSON di Django yang telah kamu deploy.
 Saya membuat halaman ProductEntryListPage. Saya memanggil fungsi async yang melakukan HTTP GET request ke endpoint JSON. Hasilnya ditampilkan dalam bentuk daftar card.
 - Membuat halaman detail untuk setiap item yang terdapat pada halaman daftar Item.
